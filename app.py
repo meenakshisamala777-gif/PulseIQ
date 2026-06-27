@@ -1,6 +1,9 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+from database.init_db import initialize_database
+
+initialize_database()
 def load_css():
     with open("styles/style.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)

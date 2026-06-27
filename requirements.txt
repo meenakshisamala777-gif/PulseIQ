@@ -1,11 +1,10 @@
 streamlit
 pandas
 numpy
-scikit-learn
 plotly
 folium
 streamlit-folium
-sqlite-utils
 reportlab
-joblib
+qrcode[pil]
 Pillow
+openpyxl
