@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.env/
+
+# Database
+*.db
+*.sqlite3
+
+# Reports
+reports/
+*.pdf
+*.png
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache
+.cache/
+
+# Streamlit cache
+.streamlit/
+
+# Python environment
+.python-version
