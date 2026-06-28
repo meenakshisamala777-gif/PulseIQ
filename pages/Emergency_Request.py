@@ -1,4 +1,3 @@
-
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -7,7 +6,6 @@ from utils.ai_recommendation import recommend_hospital
 from utils.pdf_generator import generate_pdf
 from utils.emergency_priority import get_priority
 from utils.qrcode_generator import create_qr
-from utils.severity_predictor import predict_severity
 
 st.set_page_config(
     page_title="Emergency Request",
@@ -19,9 +17,9 @@ st.title("🚨 AI Emergency Care Resource Allocator")
 
 st.write("Fill in the patient details to find the best hospital.")
 
-# -----------------------------
+# -------------------------
 # Database Connection
-# -----------------------------
+# -------------------------
 
 conn = sqlite3.connect("database.db")
 
@@ -30,9 +28,9 @@ df = pd.read_sql_query(
     conn
 )
 
-# -----------------------------
+# -------------------------
 # Patient Details
-# -----------------------------
+# -------------------------
 
 patient_name = st.text_input(
     "👤 Patient Name"
@@ -57,24 +55,25 @@ location = st.text_input(
 submit = st.button(
     "🔍 Find Best Hospital"
 )
-# -----------------------------
-# Find Best Hospital
-# -----------------------------
+
+# -------------------------
+# Process Request
+# -------------------------
 
 if submit:
 
     if patient_name.strip() == "":
-        st.error("Please enter the patient name.")
+        st.error("Please enter patient name.")
         st.stop()
 
     if location.strip() == "":
-        st.error("Please enter the current location.")
+        st.error("Please enter current location.")
         st.stop()
 
     available = df[df["available_beds"] > 0]
 
     if available.empty:
-        st.error("❌ No hospitals with available beds.")
+        st.error("No hospitals with available beds.")
         st.stop()
 
     # AI Recommendation
@@ -83,59 +82,60 @@ if submit:
         emergency_type
     )
 
-    # Emergency Priority
-    priority = get_priority(emergency_type)
+    # Priority
+    priority = get_priority(
+        emergency_type
+    )
+
     st.subheader("🤖 AI Severity Prediction")
 
-st.success(f"Predicted Severity: {priority}")
+    st.success(
+        f"Predicted Severity: {priority}"
+    )
 
-    # Specialist
-specialist = best["specialists"]
+    specialist = best["specialists"]
 
-    # Google Maps Link
-maps_link = (
+    maps_link = (
         f"https://www.google.com/maps?q="
         f"{best['latitude']},{best['longitude']}"
     )
 
-    # Generate QR Code
-qr_path = create_qr(
+    qr_path = create_qr(
         maps_link,
         f"{patient_name}_QR"
     )
+        # -------------------------
+    # Display Recommendation
+    # -------------------------
 
-st.success("✅ Best Hospital Found")
+    st.success("✅ Best Hospital Found")
 
-st.info(f"🚨 Priority Level : {priority}")
+    st.info(f"🚨 Priority Level : {priority}")
 
-st.markdown(f"### 🏥 {best['hospital_name']}")
+    st.markdown(f"## 🏥 {best['hospital_name']}")
 
-col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-with col1:
-
+    with col1:
         st.write("📍 Location :", best["location"])
-
         st.write("🛏 Available Beds :", best["available_beds"])
-
         st.write("❤️ ICU Beds :", best["available_icu"])
 
-with col2:
-
+    with col2:
         st.write("🚑 Ambulances :", best["ambulances"])
-
         st.write("👨‍⚕ Specialists :", specialist)
 
-        st.markdown(
-            f"[📍 Open in Google Maps]({maps_link})"
-        )
-            # -----------------------------
+    st.markdown(
+        f"### 📍 [Open in Google Maps]({maps_link})"
+    )
+
+    # -------------------------
     # Save Emergency Request
-    # -----------------------------
+    # -------------------------
 
-cursor = conn.cursor()
+    cursor = conn.cursor()
 
-cursor.execute(
+    cursor.execute(
         """
         INSERT INTO emergency_requests
         (
@@ -157,15 +157,14 @@ cursor.execute(
         )
     )
 
-conn.commit()
+    conn.commit()
 
-st.success("✅ Emergency Request Saved Successfully!")
+    st.success("✅ Emergency Request Saved Successfully!")
+        # -------------------------
+    # Generate PDF Report
+    # -------------------------
 
-    # -----------------------------
-    # Generate PDF
-    # -----------------------------
-
-pdf_file = generate_pdf(
+    pdf_file = generate_pdf(
         patient_name=patient_name,
         emergency_type=emergency_type,
         priority=priority,
@@ -179,9 +178,9 @@ pdf_file = generate_pdf(
         qr_path=qr_path
     )
 
-st.success("📄 PDF Report Generated Successfully!")
+    st.success("📄 PDF Report Generated Successfully!")
 
-with open(pdf_file, "rb") as pdf:
+    with open(pdf_file, "rb") as pdf:
 
         st.download_button(
             label="📥 Download Emergency Report",
@@ -190,8 +189,8 @@ with open(pdf_file, "rb") as pdf:
             mime="application/pdf"
         )
 
-# -----------------------------
-# Close Database Connection
-# -----------------------------
+# -------------------------
+# Close Database
+# -------------------------
 
 conn.close()
