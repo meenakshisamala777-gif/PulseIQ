@@ -1,18 +1,17 @@
-import streamlit as st
+import sqlite3
 
-st.set_page_config(page_title="Admin Login", page_icon="🔐")
+conn = sqlite3.connect("database.db")
+cursor = conn.cursor()
 
-st.title("🔐 Admin Login")
+try:
+    cursor.execute("SELECT * FROM admins")
+    admins = cursor.fetchall()
 
-st.write("Enter your admin credentials.")
+    print("Admins in database:")
+    for admin in admins:
+        print(admin)
 
-username = st.text_input("Username")
-password = st.text_input("Password", type="password")
+except Exception as e:
+    print("Error:", e)
 
-if st.button("Login"):
-
-    if username == "admin" and password == "admin123":
-        st.success("✅ Login Successful")
-        st.info("Go to the Admin Dashboard page from the left sidebar.")
-    else:
-        st.error("❌ Invalid Username or Password")
+conn.close()
